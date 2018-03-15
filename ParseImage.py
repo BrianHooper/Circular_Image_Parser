@@ -1,30 +1,31 @@
 import math
-from PIL import Image, ImageDraw, ImageEnhance
+from PIL import Image, ImageDraw, ImageEnhance, ImageOps
 
 # Open image and initialize variables
-filename = 'minimal.jpg'
+filename = 'gb.jpg'
 im = Image.open(filename)
 # contrast = ImageEnhance.Contrast(im)
 # im = contrast.enhance(4)
 # im.save("reducedImage.jpg")
+im = ImageOps.posterize(im, 4)
 px = im.load()
 width, height = im.size
 
 # How close the colors are to each other
 # smaller = closer to each other
-threshold = 15
+threshold = 25
 
 # Distance between pixels to check
 precision = 10
 
 # Stop after no circles of at least this radius are found
-minimum_size = 3
+minimum_size = 2
 
 # How far to increase the radius after each search
 radius_step = 2
 
 # Rate of increase in points as search radius increases
-logarithmic_coefficient = 20
+logarithmic_coefficient = 25
 
 special_color = (218, 235, 111)
 completedimage = Image.new("RGB", (width, height), "black")
