@@ -1,4 +1,5 @@
 import math
+import gizeh
 from PIL import Image, ImageDraw, ImageEnhance, ImageOps
 
 # Open image and initialize variables
@@ -7,13 +8,13 @@ im = Image.open(filename)
 # contrast = ImageEnhance.Contrast(im)
 # im = contrast.enhance(4)
 # im.save("reducedImage.jpg")
-im = ImageOps.posterize(im, 4)
+# im = ImageOps.posterize(im, 4)
 px = im.load()
 width, height = im.size
 
 # How close the colors are to each other
 # smaller = closer to each other
-threshold = 25
+threshold = 10
 
 # Distance between pixels to check
 precision = 10
@@ -22,7 +23,7 @@ precision = 10
 minimum_size = 2
 
 # How far to increase the radius after each search
-radius_step = 2
+radius_step = 1
 
 # Rate of increase in points as search radius increases
 logarithmic_coefficient = 25
@@ -33,8 +34,8 @@ completedimage = Image.new("RGB", (width, height), "black")
 
 # Gets the number of search points as a factor of x
 def get_num_points(x):
-    return int(logarithmic_coefficient * math.log2(x) + 1)
-    # return x
+    # return int(logarithmic_coefficient * math.log2(x) + 1)
+    return x
 
 
 # Get the relative points in a circle of a specified radius
@@ -137,7 +138,7 @@ def test_radius(x, y, radius):
 
 # Searches for the largest circle centered at point (x, y) is entirely within the color threshold
 def find_biggest_radius(x, y):
-    radius = 1
+    radius = max_radius_found[2] - 1
     while test_radius(x, y, radius):
         radius = radius + 1
     return radius
@@ -174,31 +175,51 @@ max_radius_found = (0, 0, 100)
 completed_points = []
 
 while max_radius_found[2] > minimum_size:
-    max_radius_found = (0, 0, 0)
+    max_radius_found = (0, 0, 2)
     for xcoordinate in range(precision, width - precision, precision):
-        print("Testing " + str(xcoordinate) + " max: " + str(max_radius_found))
+        # print("Testing " + str(xcoordinate) + " max: " + str(max_radius_found))
         for ycoordinate in range(precision, height - precision, precision):
             # print("Testing (" + str(xcoordinate) + ", " + str(ycoordinate) + ") max: " + str(max_radius_found))
             current_radius = find_biggest_radius(xcoordinate, ycoordinate)
             if current_radius > max_radius_found[2]:
                 max_radius_found = (xcoordinate, ycoordinate, current_radius)
-    completed_points.append(max_radius_found)
+    completed_point = (max_radius_found, get_pixel(max_radius_found[0], max_radius_found[1]))
+    completed_points.append(completed_point)
     print("Found radius " + str(max_radius_found))
     draw_special(max_radius_found[0], max_radius_found[1], max_radius_found[2])
     im.save("output.jpg")
-    if len(completed_points) % 20 == 0:
-        threshold = threshold + 5
+    # if len(completed_points) % 20 == 0:
+    #     threshold = threshold + 5
 
 # Return the image to its state before the special color was drawn on it
 im = Image.open(filename)
 px = im.load()
 
 # Draw the completed image
-for completedpoint in completed_points:
-    print(completedpoint)
-    pointcolor = get_pixel(completedpoint[0], completedpoint[1])
-    if not pointcolor is None:
-        draw_color(completedpoint[0], completedpoint[1], completedpoint[2], pointcolor)
-completedimage.save("completedimage.jpg")
+# for completedpoint in completed_points:
+#     print(completedpoint)
+#     pointcolor = get_pixel(completedpoint[0], completedpoint[1])
+#     if not pointcolor is None:
+#         draw_color(completedpoint[0], completedpoint[1], completedpoint[2], pointcolor)
+# completedimage.save("completedimage.jpg")
 
-
+surface = gizeh.Surface(width=width, height=height, bg_color=(1, 1, 1))
+for point in completed_points:
+    radius = point[0][2]
+    xcoord = point[0][0]
+    ycoord = point[0][1]
+    red = point[1][0] / 255
+    green = point[1][0] / 255
+    blue = point[1][0] / 255
+    red = red + (1 - red) / 2
+    green = green + (1 - green) / 2
+    blue = blue + (1 - blue) / 2
+    radius = int(2 * (radius / 3))
+    circle = gizeh.circle(r=radius, xy=[xcoord, ycoord], fill=(red, green, blue), stroke_width=2, stroke=(0,0,0))
+    circle.draw(surface)
+    red = point[1][0] / 255
+    green = point[1][0] / 255
+    blue = point[1][0] / 255
+    circle = gizeh.circle(r=radius, xy=[xcoord, ycoord], fill=(red, green, blue))
+    circle.draw(surface)
+surface.write_to_png("completedvector.png")
