@@ -13,7 +13,7 @@ import gizeh
 
 # Drawing settings
 outputbackgroundcolor = (0, 0, 0)  # Background color of the final image
-outer_color_threshold = 2  # How much lighter to color the outer region of the circle
+outer_color_threshold = 1  # How much lighter to color the outer region of the circle
 inner_color_width = 2 / 3  # Percentage of the circle taken up by the inner circle
 border_width = 2  # Thickness of the border
 border_color = (0, 0, 0)  # Color of the border
@@ -26,9 +26,9 @@ def draw_image(points, filename, width, height):
 
         # Draw the outer color
         radius = point[0][2]
-        outer_color = ((255 - (point[1][0] / outer_color_threshold)) / 255,
-                       (255 - (point[1][1] / outer_color_threshold)) / 255,
-                       (255 - (point[1][2] / outer_color_threshold)) / 255)
+        outer_color = (((point[1][0] + (255 - point[1][0]) / 2) / 255),
+                       ((point[1][1] + (255 - point[1][1]) / 2) / 255),
+                       ((point[1][2] + (255 - point[1][2]) / 2) / 255))
 
         if radius <= 3:
             border = 0

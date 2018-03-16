@@ -14,7 +14,7 @@ import Draw
 
 
 def main():
-    filename = "tinybee.jpg"
+    filename = "bee.jpg"
 
     # Set options for parser
     parser = Parse.Parse()
