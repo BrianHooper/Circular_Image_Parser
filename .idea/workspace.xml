@@ -2,8 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="54e9ba93-6718-41de-afad-0f5a76610e3b" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ParseImage.py" afterPath="$PROJECT_DIR$/ParseImage.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Draw.py" afterPath="$PROJECT_DIR$/Draw.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Ellipsifier.py" afterPath="$PROJECT_DIR$/Ellipsifier.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Parse.py" afterPath="$PROJECT_DIR$/Parse.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -17,23 +18,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="ParseImage.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/ParseImage.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2822">
-              <caret line="178" column="31" lean-forward="false" selection-start-line="178" selection-start-column="31" selection-end-line="178" selection-end-column="31" />
-              <folding>
-                <element signature="e#0#11#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="Ellipsifier.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Ellipsifier.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="357">
-              <caret line="21" column="24" lean-forward="true" selection-start-line="21" selection-start-column="24" selection-end-line="21" selection-end-column="24" />
+            <state relative-caret-position="118">
+              <caret line="21" column="24" lean-forward="false" selection-start-line="21" selection-start-column="24" selection-end-line="21" selection-end-column="24" />
               <folding>
                 <element signature="e#239#251#0" expanded="true" />
               </folding>
@@ -44,8 +33,8 @@
       <file leaf-file-name="Parse.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Parse.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="510">
-              <caret line="30" column="76" lean-forward="false" selection-start-line="30" selection-start-column="76" selection-end-line="30" selection-end-column="76" />
+            <state relative-caret-position="358">
+              <caret line="77" column="93" lean-forward="false" selection-start-line="77" selection-start-column="93" selection-end-line="77" selection-end-column="93" />
               <folding>
                 <element signature="e#234#245#0" expanded="true" />
               </folding>
@@ -56,8 +45,8 @@
       <file leaf-file-name="Draw.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Draw.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="459">
-              <caret line="42" column="0" lean-forward="true" selection-start-line="42" selection-start-column="0" selection-end-line="42" selection-end-column="0" />
+            <state relative-caret-position="237">
+              <caret line="31" column="0" lean-forward="true" selection-start-line="31" selection-start-column="0" selection-end-line="31" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -86,8 +75,8 @@
         <option value="$PROJECT_DIR$/Solution.py" />
         <option value="$PROJECT_DIR$/DrawVector.py" />
         <option value="$PROJECT_DIR$/ParseImage.py" />
-        <option value="$PROJECT_DIR$/Parse.py" />
         <option value="$PROJECT_DIR$/Draw.py" />
+        <option value="$PROJECT_DIR$/Parse.py" />
         <option value="$PROJECT_DIR$/Ellipsifier.py" />
       </list>
     </option>
@@ -99,9 +88,9 @@
     <sorting>DEFINITION_ORDER</sorting>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="1491" />
-    <option name="width" value="1272" />
-    <option name="height" value="692" />
+    <option name="x" value="1854" />
+    <option name="width" value="1133" />
+    <option name="height" value="729" />
   </component>
   <component name="ProjectView">
     <navigator currentView="ProjectPane" proportions="" version="1">
@@ -134,7 +123,7 @@
     </panes>
   </component>
   <component name="PropertiesComponent">
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/DrawVector.py" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/Ellipsifier.py" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
     <property name="WebServerToolWindowFactoryState" value="false" />
   </component>
@@ -150,7 +139,24 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.Unnamed">
+  <component name="RunManager" selected="Python.Ellipsifier">
+    <configuration name="Ellipsifier" type="PythonConfigurationType" factoryName="Python">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="/usr/bin/python3.6" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="CircularImageParser" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Ellipsifier.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+    </configuration>
     <configuration name="Standard" type="PythonConfigurationType" factoryName="Python">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -164,23 +170,6 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="CircularImageParser" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/ParseImage.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-    </configuration>
-    <configuration name="Unnamed" type="PythonConfigurationType" factoryName="Python">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="/usr/bin/python3.6" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="false" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="CircularImageParser" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/ParseImage.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
@@ -205,7 +194,7 @@
     </configuration>
     <list size="3">
       <item index="0" class="java.lang.String" itemvalue="Python.Standard" />
-      <item index="1" class="java.lang.String" itemvalue="Python.Unnamed" />
+      <item index="1" class="java.lang.String" itemvalue="Python.Ellipsifier" />
       <item index="2" class="java.lang.String" itemvalue="Python.vector" />
     </list>
   </component>
@@ -260,7 +249,14 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="7" />
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/Parse.py</url>
+          <line>74</line>
+          <option name="timeStamp" value="10" />
+        </line-breakpoint>
+      </breakpoints>
+      <option name="time" value="11" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -346,7 +342,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/ParseImage.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2822">
+        <state relative-caret-position="3026">
           <caret line="178" column="31" lean-forward="false" selection-start-line="178" selection-start-column="31" selection-end-line="178" selection-end-column="31" />
           <folding>
             <element signature="e#0#11#0" expanded="true" />
@@ -354,28 +350,28 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/Draw.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="237">
+          <caret line="31" column="0" lean-forward="true" selection-start-line="31" selection-start-column="0" selection-end-line="31" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/Parse.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="510">
-          <caret line="30" column="76" lean-forward="false" selection-start-line="30" selection-start-column="76" selection-end-line="30" selection-end-column="76" />
+        <state relative-caret-position="358">
+          <caret line="77" column="93" lean-forward="false" selection-start-line="77" selection-start-column="93" selection-end-line="77" selection-end-column="93" />
           <folding>
             <element signature="e#234#245#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Draw.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="459">
-          <caret line="42" column="0" lean-forward="true" selection-start-line="42" selection-start-column="0" selection-end-line="42" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Ellipsifier.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="357">
-          <caret line="21" column="24" lean-forward="true" selection-start-line="21" selection-start-column="24" selection-end-line="21" selection-end-column="24" />
+        <state relative-caret-position="118">
+          <caret line="21" column="24" lean-forward="false" selection-start-line="21" selection-start-column="24" selection-end-line="21" selection-end-column="24" />
           <folding>
             <element signature="e#239#251#0" expanded="true" />
           </folding>

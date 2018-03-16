@@ -14,27 +14,27 @@ import Draw
 
 
 def main():
-    filename = "TestImage.jpg"
+    filename = "tinybee.jpg"
 
     # Set options for parser
     parser = Parse.Parse()
-    parser.threshold = 7
-    parser.precision = 3
+    parser.threshold = 30
+    parser.precision = 2
     parser.minimum_size = 2
 
     # Parse the image
     points = parser.evaluate_image(filename)
 
     # Draw the parsed image
-    if len(points > 0):
-        logfile = filename + "log.txt"
-        file = open(logfile)
+    if len(points) > 0:
+        logfile = "log.txt"
+        file = open(logfile, "w+")
         for p in points:
-            file.write("((" + p[0][0] + ", " + p[0][1] + ", " + p[0][2] + "),(" +
-                       p[1][0] + ", " + p[1][1] + ", " + p[1][2] + "))")
+            file.write("((" + str(p[0][0]) + ", " + str(p[0][1]) + ", " + str(p[0][2]) + "),(" +
+                       str(p[1][0]) + ", " + str(p[1][1]) + ", " + str(p[1][2]) + "))\n")
 
         drawer = Draw
-        drawer.draw_image(points, "", parser.width, parser.height)
+        drawer.draw_image(points, "output.png", parser.width, parser.height)
 
 
 if __name__ == "__main__":

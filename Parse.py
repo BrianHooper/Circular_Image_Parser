@@ -46,10 +46,10 @@ class Parse:
             # Calculate some information about the process
             num_pixels = 0
             for point in completed_points:
-                circle_pixels = math.pi * point[2] * point[2]
+                circle_pixels = int(math.pi * point[0][2] * point[0][2])
                 num_pixels = num_pixels + circle_pixels
             print("Calculated " + str(len(completed_points)) + " circles encompassing " +
-                  str(num_pixels) + " pixels in " + str(stop - start) + " time.")
+                  str(num_pixels) + " pixels in " + str(int(stop - start)) + " second(s).")
 
             return completed_points
         except IOError:
@@ -178,7 +178,7 @@ class Parse:
 
     # Searches for the largest circle centered at point (x, y) is entirely within the color threshold
     def __find_biggest_radius(self, x, y, starting_radius):
-        radius = starting_radius - 1
+        radius = starting_radius
         while self.__test_radius(x, y, radius):
             radius = radius + 1
         return radius

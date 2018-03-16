@@ -29,8 +29,14 @@ def draw_image(points, filename, width, height):
         outer_color = ((255 - (point[1][0] / outer_color_threshold)) / 255,
                        (255 - (point[1][1] / outer_color_threshold)) / 255,
                        (255 - (point[1][2] / outer_color_threshold)) / 255)
+
+        if radius <= 3:
+            border = 0
+        else:
+            border = border_width
+
         circle = gizeh.circle(r=radius, xy=[x, y], fill=outer_color,
-                              stroke_width=border_width, stroke=border_color)
+                              stroke_width=border, stroke=border_color)
         circle.draw(surface)
 
         # Draw the inner color
