@@ -18,6 +18,7 @@ inner_color_width = 2 / 3  # Percentage of the circle taken up by the inner circ
 border_width = 2  # Thickness of the border
 border_color = (0, 0, 0)  # Color of the border
 
+
 def draw_image(points, filename, width, height):
     surface = gizeh.Surface(width=width, height=height, bg_color=outputbackgroundcolor)
     for point in points:

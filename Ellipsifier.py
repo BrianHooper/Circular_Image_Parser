@@ -11,30 +11,48 @@ __email__ = "brian_hooper@msn.com"
 
 import Parse
 import Draw
+from ast import literal_eval as make_tuple
+
+
+def parse_from_file(filename):
+    points = []
+
+    file = open(filename + ".jpg.txt", "r")
+    lines = file.readlines()
+    parser = Parse.Parse(filename + ".jpg")
+
+    for line in lines:
+        points.append(make_tuple(line))
+
+    color_points = parser.get_all_colors(points)
+
+    draw_image(filename, color_points, parser.width, parser.height)
+
+    file.close()
+
+
+def parse_image(filename):
+    # Set options for parser
+    parser = Parse.Parse(filename + ".jpg")
+    parser.threshold = 18
+    parser.precision = 3
+    parser.minimum_size = 6
+
+    # Parse the image
+    points = parser.evaluate_image()
+
+    # Draw the parsed image
+    draw_image(filename, points, parser.width, parser.height)
+
+
+def draw_image(filename, points, width, height):
+    if len(points) > 0:
+        drawer = Draw
+        drawer.draw_image(points, filename + "_output.png", width, height)
 
 
 def main():
-    filename = "bee.jpg"
-
-    # Set options for parser
-    parser = Parse.Parse()
-    parser.threshold = 30
-    parser.precision = 2
-    parser.minimum_size = 2
-
-    # Parse the image
-    points = parser.evaluate_image(filename)
-
-    # Draw the parsed image
-    if len(points) > 0:
-        logfile = "log.txt"
-        file = open(logfile, "w+")
-        for p in points:
-            file.write("((" + str(p[0][0]) + ", " + str(p[0][1]) + ", " + str(p[0][2]) + "),(" +
-                       str(p[1][0]) + ", " + str(p[1][1]) + ", " + str(p[1][2]) + "))\n")
-
-        drawer = Draw
-        drawer.draw_image(points, "output.png", parser.width, parser.height)
+    parse_from_file("gtr")
 
 
 if __name__ == "__main__":

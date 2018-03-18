@@ -26,35 +26,35 @@ class Parse:
     threshold = 7  # How close the colors are to each other
     precision = 2  # Distance between pixels to check
     minimum_size = 1  # Stop after no circles of at least this radius are found
+    maximum_size = 50 # Largest radius to find
     radius_step = 1  # How far to increase the radius after each search
     threshold_increase_frequency = 10  # Increase color threshold after this many points are found
     threshold_increase_amount = 0  # Increase color threshold by this amount
 
-    def evaluate_image(self, filename):
+    def __init__(self, filename):
         self.inputfilename = filename
         try:
-            # Attempt to open the file
             self.image = Image.open(filename)
             self.image_pixels = self.image.load()
             self.width, self.height = self.image.size
-
-            # Parse the image
-            start = timeit.default_timer()  # Timer
-            completed_points = self.__parse_image()
-            stop = timeit.default_timer()  # Timer
-
-            # Calculate some information about the process
-            num_pixels = 0
-            for point in completed_points:
-                circle_pixels = int(math.pi * point[0][2] * point[0][2])
-                num_pixels = num_pixels + circle_pixels
-            print("Calculated " + str(len(completed_points)) + " circles encompassing " +
-                  str(num_pixels) + " pixels in " + str(int(stop - start)) + " second(s).")
-
-            return completed_points
         except IOError:
-            print("Error opening " + filename)
-            return []
+            print("Cannot open image file")
+
+    def evaluate_image(self):
+        # Parse the image
+        start = timeit.default_timer()  # Timer
+        completed_points = self.__parse_image()
+        stop = timeit.default_timer()  # Timer
+
+        # Calculate some information about the process
+        num_pixels = 0
+        for point in completed_points:
+            circle_pixels = int(math.pi * point[0][2] * point[0][2])
+            num_pixels = num_pixels + circle_pixels
+        print("Calculated " + str(len(completed_points)) + " circles encompassing " +
+              str(num_pixels) + " pixels in " + str(int(stop - start)) + " second(s).")
+
+        return completed_points
 
     def __parse_image(self):
         completed_points = []
@@ -73,6 +73,7 @@ class Parse:
             completed_point = (max_radius_found, self.__get_pixel(max_radius_found[0], max_radius_found[1]))
             completed_points.append(completed_point)
             print("Found radius " + str(max_radius_found))
+            self.__write_log(max_radius_found)
 
             # Lock pixels by drawing the circle on the canvas using the special color
             self.__draw_special(max_radius_found[0], max_radius_found[1], max_radius_found[2])
@@ -161,6 +162,8 @@ class Parse:
     def __test_radius(self, x, y, radius):
         if self.__radius_off_image(x, y, radius):
             return False
+        if radius > self.maximum_size:
+            return False
         absolute_points = self.__get_points(x, y, radius)
 
         center = self.__get_pixel(x, y)
@@ -199,3 +202,15 @@ class Parse:
                 pointcolor[2] == self.special_color[2]:
             return True
         return False
+
+    def __write_log(self, point):
+        file = open(self.inputfilename + ".txt", "a+")
+        file.write(str(point) + "\n")
+        file.close()
+
+    def get_all_colors(self, points):
+        point_color_list = []
+        for point in points:
+            point_color = (point, self.__get_pixel(point[0], point[1]))
+            point_color_list.append(point_color)
+        return point_color_list
