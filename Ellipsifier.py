@@ -49,8 +49,9 @@ def draw_image(filename, points, width, height):
 
 
 def main():
-    parse_image("images/blank")
-    parse_from_file("images/blank")
+    filename = "images/" + "gtr"
+    # parse_image(filename)
+    parse_from_file(filename)
 
 
 if __name__ == "__main__":

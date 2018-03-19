@@ -12,7 +12,7 @@ __email__ = "brian_hooper@msn.com"
 import math
 import timeit
 from PIL import Image, ImageDraw
-
+from multiprocessing import Value, Lock, Queue, Process
 
 class Parse:
     # Input settings and image objects
@@ -29,6 +29,8 @@ class Parse:
     radius_step = 1  # How far to increase the radius after each search
     threshold_increase_frequency = 10  # Increase color threshold after this many points are found
     threshold_increase_amount = 0  # Increase color threshold by this amount
+
+    num_threads = 108
 
     def __init__(self, filename):
         self.inputfilename = filename
@@ -48,46 +50,61 @@ class Parse:
 
         # Parse the image
         start = timeit.default_timer()  # Timer
-        completed_points = self.__parse_image()
+        self.__parse_image()
         stop = timeit.default_timer()  # Timer
 
         # Calculate some information about the process
-        num_pixels = 0
-        for point in completed_points:
-            circle_pixels = int(math.pi * point[0][2] * point[0][2])
-            num_pixels = num_pixels + circle_pixels
-        print("Calculated " + str(len(completed_points)) + " circles encompassing " +
-              str(num_pixels) + " pixels in " + str(int(stop - start)) + " second(s).")
+        print("Calculated in " + str(int(stop - start)) + " second(s).")
 
-        return completed_points
+    def __thread_process(self, queue, max_rad, max_x, max_y, lock):
+        while queue.qsize() > 0:
+            x_val = queue.get()
+            for y_val in range(self.precision, self.height - self.precision, self.precision):
+                lock.acquire()
+                current_radius = self.__find_biggest_radius(x_val, y_val, max_rad.value)
+                if current_radius > max_rad.value:
+                    max_rad.value = current_radius
+                    max_x.value = x_val
+                    max_y.value = y_val
+                lock.release()
 
     def __parse_image(self):
-        completed_points = []
-        max_radius_found = (0, 0, 100)
-        while max_radius_found[2] > self.minimum_size:
-            max_radius_found = (0, 0, 0)
+        max_rad = Value('i', 100)
+        max_x = Value('i', 0)
+        max_y = Value('i', 0)
+
+        lock = Lock()
+        queue = Queue()
+        threads = []
+
+        while max_rad.value > self.minimum_size:
+            max_rad.value = 0
+            max_x.value = 0
+            max_y.value = 0
 
             # Find the largest circle within the color threshold on the image
             for xcoordinate in range(self.precision, self.width - self.precision, self.precision):
-                for ycoordinate in range(self.precision, self.height - self.precision, self.precision):
-                    current_radius = self.__find_biggest_radius(xcoordinate, ycoordinate, max_radius_found[2])
-                    if current_radius > max_radius_found[2]:
-                        max_radius_found = (xcoordinate, ycoordinate, current_radius)
+                queue.put(xcoordinate)
+
+            # Start threads
+            for t in range(0, self.num_threads):
+                p = Process(target=self.__thread_process, args=(queue, max_rad, max_x, max_y, lock))
+                p.start()
+                threads.append(p)
+
+            # Terminate threads
+            for thread in threads:
+                thread.join()
+
+            max_radius_found = (max_x.value, max_y.value, max_rad.value)
 
             # Save the found point
-            completed_point = (max_radius_found, self.__get_pixel(max_radius_found[0], max_radius_found[1]))
-            completed_points.append(completed_point)
             print("Found radius " + str(max_radius_found))
             self.__write_log(max_radius_found)
 
             # Lock pixels by drawing the circle on the canvas using the special color
-            self.__draw_special(max_radius_found[0], max_radius_found[1], max_radius_found[2])
+            self.__draw_special(max_x.value, max_y.value, max_rad.value)
             self.image.save(self.inputfilename + "_temp.jpg")
-
-            # Increase the threshold as more points are found
-            if len(completed_points) % self.threshold_increase_frequency == 0:
-                self.threshold = self.threshold + self.threshold_increase_amount
-        return completed_points
 
     # Gets the color (r, g, b) tuple from a pixel located at (x, y)
     def __get_pixel(self, x, y, ):
