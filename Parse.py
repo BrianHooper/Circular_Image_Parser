@@ -17,7 +17,6 @@ from PIL import Image, ImageDraw
 class Parse:
     # Input settings and image objects
     inputfilename = ""  # File to parse
-    tempfilename = "temp.jpg"  # Output process to this file
     image, image_pixels = 0, 0
     width, height = 0, 0
     special_color = (218, 235, 111)  # Special color used to mark regions as complete
@@ -33,14 +32,20 @@ class Parse:
 
     def __init__(self, filename):
         self.inputfilename = filename
-        try:
-            self.image = Image.open(filename)
-            self.image_pixels = self.image.load()
-            self.width, self.height = self.image.size
-        except IOError:
-            print("Cannot open image file")
+        self.image = Image.open(filename + ".jpg")
+        self.image_pixels = self.image.load()
+        self.width, self.height = self.image.size
+
 
     def evaluate_image(self):
+        # Truncate the log file
+        try:
+            file = open(self.inputfilename + ".txt", "w+")
+            file.write("")
+            file.close()
+        except IOError:
+            pass
+
         # Parse the image
         start = timeit.default_timer()  # Timer
         completed_points = self.__parse_image()
@@ -77,7 +82,7 @@ class Parse:
 
             # Lock pixels by drawing the circle on the canvas using the special color
             self.__draw_special(max_radius_found[0], max_radius_found[1], max_radius_found[2])
-            self.image.save(self.tempfilename)
+            self.image.save(self.inputfilename + "_temp.jpg")
 
             # Increase the threshold as more points are found
             if len(completed_points) % self.threshold_increase_frequency == 0:

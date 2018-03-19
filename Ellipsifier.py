@@ -17,9 +17,9 @@ from ast import literal_eval as make_tuple
 def parse_from_file(filename):
     points = []
 
-    file = open(filename + ".jpg.txt", "r")
+    file = open(filename + ".txt", "r")
     lines = file.readlines()
-    parser = Parse.Parse(filename + ".jpg")
+    parser = Parse.Parse(filename)
 
     for line in lines:
         points.append(make_tuple(line))
@@ -33,16 +33,13 @@ def parse_from_file(filename):
 
 def parse_image(filename):
     # Set options for parser
-    parser = Parse.Parse(filename + ".jpg")
+    parser = Parse.Parse(filename)
     parser.threshold = 18
     parser.precision = 3
     parser.minimum_size = 6
 
     # Parse the image
-    points = parser.evaluate_image()
-
-    # Draw the parsed image
-    draw_image(filename, points, parser.width, parser.height)
+    parser.evaluate_image()
 
 
 def draw_image(filename, points, width, height):
@@ -52,7 +49,8 @@ def draw_image(filename, points, width, height):
 
 
 def main():
-    parse_from_file("gtr")
+    parse_image("images/blank")
+    parse_from_file("images/blank")
 
 
 if __name__ == "__main__":
