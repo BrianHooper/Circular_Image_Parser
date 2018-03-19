@@ -34,9 +34,9 @@ def parse_from_file(filename):
 def parse_image(filename):
     # Set options for parser
     parser = Parse.Parse(filename)
-    parser.threshold = 18
+    parser.threshold = 25
     parser.precision = 3
-    parser.minimum_size = 6
+    parser.minimum_size = 5
 
     # Parse the image
     parser.evaluate_image()
@@ -49,8 +49,8 @@ def draw_image(filename, points, width, height):
 
 
 def main():
-    filename = "images/" + "gtr"
-    # parse_image(filename)
+    filename = "images/" + "tux"
+    parse_image(filename)
     parse_from_file(filename)
 
 
