@@ -15,41 +15,49 @@ from ast import literal_eval as make_tuple
 
 
 def parse_from_file(filename):
-    points = []
+    try:
+        file = open(filename + ".txt", "r")
+        lines = file.readlines()
+        file.close()
 
-    file = open(filename + ".txt", "r")
-    lines = file.readlines()
-    parser = Parse.Parse(filename)
+        points = []
+        for line in lines:
+            points.append(make_tuple(line))
 
-    for line in lines:
-        points.append(make_tuple(line))
+        parser = Parse.Parse(filename)
+        color_points = parser.get_all_colors(points)
 
-    color_points = parser.get_all_colors(points)
-
-    draw_image(filename, color_points, parser.width, parser.height)
-
-    file.close()
+        draw_image(filename, color_points, parser.width, parser.height)
+    except IOError:
+        print("Error opening text file " + filename + ".txt")
+        return
 
 
 def parse_image(filename):
-    # Set options for parser
+    # Open the file
     parser = Parse.Parse(filename)
-    parser.threshold = 25
-    parser.precision = 3
-    parser.minimum_size = 5
 
-    # Parse the image
-    parser.evaluate_image()
+    if parser.is_opened():
+        # Set options for parser
+        parser.threshold = 50
+        parser.precision = 10
+        parser.minimum_size = 20
+
+        # Parse the image
+        parser.evaluate_image()
 
 
 def draw_image(filename, points, width, height):
+    if filename is None or points is None:
+        return
+
     if len(points) > 0:
         drawer = Draw
         drawer.draw_image(points, filename + "_output.png", width, height)
 
 
 def main():
-    filename = "images/" + "tux"
+    filename = "images/" + "tinyhippo"
     parse_image(filename)
     parse_from_file(filename)
 

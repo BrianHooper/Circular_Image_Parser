@@ -18,8 +18,10 @@ from multiprocessing import Value, Lock, Queue, Process
 
 
 class Parse:
+    __opened = False
+
     # Input settings and image objects
-    inputfilename = ""  # File to parse
+    input_filename = ""  # File to parse
     image, image_pixels = 0, 0
     width, height = 0, 0
     special_color = (218, 235, 111)  # Special color used to mark regions as complete
@@ -28,7 +30,7 @@ class Parse:
     threshold = 7  # How close the colors are to each other
     precision = 10  # Distance between pixels to check
     minimum_size = 1  # Stop after no circles of at least this radius are found
-    maximum_size = 150 # Largest radius to find
+    maximum_size = 150  # Largest radius to find
     radius_step = 1  # How far to increase the radius after each search
     threshold_increase_frequency = 10  # Increase color threshold after this many points are found
     threshold_increase_amount = 0  # Increase color threshold by this amount
@@ -36,15 +38,27 @@ class Parse:
     num_threads = 36
 
     def __init__(self, filename):
-        self.inputfilename = filename
-        self.image = Image.open(filename + ".jpg")
-        self.image_pixels = self.image.load()
-        self.width, self.height = self.image.size
+        self.input_filename = filename
+        try:
+            self.image = Image.open(filename + ".jpg")
+            self.image_pixels = self.image.load()
+            self.width, self.height = self.image.size
+            self.__opened = True
+        except IOError:
+            print("Error opening " + filename + ".jpg")
+
+    def is_opened(self):
+        return self.__opened
 
     def evaluate_image(self):
+        # Don't try and evaluate if there is no image loaded
+        if not self.__opened:
+            print("Error, no file opened.")
+            return
+
         # Truncate the log file
         try:
-            file = open(self.inputfilename + ".txt", "w+")
+            file = open(self.input_filename + ".txt", "w+")
             file.write("")
             file.close()
         except IOError:
@@ -58,33 +72,44 @@ class Parse:
         # Calculate some information about the process
         print("Calculated in " + str(int(stop - start)) + " second(s).")
 
-    def __thread_process(self, thread_id, q, max_rad, max_x, max_y, lock):
+    def __thread_process(self, process_id, q, max_rad, max_x, max_y, lock, found_by):
+        # Continue reading x values from the queue until it is empty
         while q.qsize() > 0:
             try:
-                # print("Popping from queue from thread " + str(thread_id))
                 x_val = q.get(timeout=2)
-                # print("Popped from queue from thread " + str(thread_id))
+                # Check each y value
                 for y_val in range(self.precision, self.height - self.precision, self.precision):
-                    lock.acquire()
+                    # Find the largest radius at the current x, y location
                     current_radius = self.__find_biggest_radius(x_val, y_val, max_rad.value)
-                    if current_radius > max_rad.value:
-                        max_rad.value = current_radius
-                        max_x.value = x_val
-                        max_y.value = y_val
-                    lock.release()
+
+                    # Update the max radius if the current radius is larger than the previous max
+                    lock.acquire()
+                    try:
+                        if current_radius > max_rad.value:
+                            max_rad.value = current_radius
+                            max_x.value = x_val
+                            max_y.value = y_val
+                            found_by.value = process_id
+                    finally:
+                        lock.release()
             except queue.Empty:
                 continue
 
     def __parse_image(self):
+        # Set up variables for maximum radius
         max_rad = Value('i', 100)
         max_x = Value('i', 0)
         max_y = Value('i', 0)
+        found_by = Value('i', 0)
 
-        lock = Lock()
-        q = multiprocessing.Queue()
+        # For multiprocessing
+        multi_context = multiprocessing.get_context("fork")
+        lock = multi_context.Lock()
+        q = multi_context.Queue()
         threads = []
 
         while max_rad.value > self.minimum_size:
+            # Clear previous value for maximum radius
             max_rad.value = 0
             max_x.value = 0
             max_y.value = 0
@@ -95,7 +120,7 @@ class Parse:
 
             # Start threads
             for t in range(0, self.num_threads):
-                p = Process(target=self.__thread_process, args=(t, q, max_rad, max_x, max_y, lock))
+                p = multi_context.Process(target=self.__thread_process, args=(t, q, max_rad, max_x, max_y, lock, found_by))
                 p.start()
                 threads.append(p)
 
@@ -103,19 +128,21 @@ class Parse:
             for thread in threads:
                 thread.join()
 
+            # Update maximum radius
             max_radius_found = (max_x.value, max_y.value, max_rad.value)
 
             # Save the found point
-            print("Found radius " + str(max_radius_found))
+            print("Found radius " + str(max_radius_found) + " by process " + str(found_by.value))
             self.__write_log(max_radius_found)
 
             # Lock pixels by drawing the circle on the canvas using the special color
             self.__draw_special(max_x.value, max_y.value, max_rad.value)
-            self.image.save(self.inputfilename + "_temp.jpg")
+            self.image.save(self.input_filename + "_temp.jpg")
 
     # Gets the color (r, g, b) tuple from a pixel located at (x, y)
-    def __get_pixel(self, x, y, ):
-        if x is None or y is None:
+    # Returns (255, 255, 255) if the pixel or image is invalid
+    def __get_pixel(self, x, y):
+        if x is None or y is None or self.image_pixels is None:
             return 255, 255, 255
         return self.image_pixels[x, y]
 
@@ -232,12 +259,20 @@ class Parse:
             return True
         return False
 
+    # Appends the point to the end of the log file
     def __write_log(self, point):
-        file = open(self.inputfilename + ".txt", "a+")
+        if point is None:
+            return
+
+        file = open(self.input_filename + ".txt", "a+")
         file.write(str(point) + "\n")
         file.close()
 
+    # Gets the colors for a list of pixels
     def get_all_colors(self, points):
+        # if points is None or len(points) == 0 or self.image_pixels is None:
+        #     return
+
         point_color_list = []
         for point in points:
             point_color = (point, self.__get_pixel(point[0], point[1]))
