@@ -11,10 +11,10 @@ __email__ = "brian_hooper@msn.com"
 
 import queue
 import math
+import time
 import timeit
-from PIL import Image, ImageDraw
 import multiprocessing
-from multiprocessing import Value, Lock, Queue, Process
+from PIL import Image, ImageDraw
 
 
 class Parse:
@@ -35,7 +35,7 @@ class Parse:
     threshold_increase_frequency = 10  # Increase color threshold after this many points are found
     threshold_increase_amount = 0  # Increase color threshold by this amount
 
-    num_threads = 36
+    num_threads = 2
 
     def __init__(self, filename):
         self.input_filename = filename
@@ -94,19 +94,19 @@ class Parse:
                         lock.release()
             except queue.Empty:
                 continue
+        time.sleep(5)
 
     def __parse_image(self):
-        # Set up variables for maximum radius
-        max_rad = Value('i', 100)
-        max_x = Value('i', 0)
-        max_y = Value('i', 0)
-        found_by = Value('i', 0)
-
         # For multiprocessing
         multi_context = multiprocessing.get_context("fork")
         lock = multi_context.Lock()
         q = multi_context.Queue()
-        threads = []
+
+        # Set up variables for maximum radius
+        max_rad = multi_context.Value('i', 100)
+        max_x = multi_context.Value('i', 0)
+        max_y = multi_context.Value('i', 0)
+        found_by = multi_context.Value('i', 0)
 
         while max_rad.value > self.minimum_size:
             # Clear previous value for maximum radius
@@ -118,14 +118,17 @@ class Parse:
             for xcoordinate in range(self.precision, self.width - self.precision, self.precision):
                 q.put(xcoordinate)
 
+            threads = []
             # Start threads
             for t in range(0, self.num_threads):
+                print("starting thread")
                 p = multi_context.Process(target=self.__thread_process, args=(t, q, max_rad, max_x, max_y, lock, found_by))
                 p.start()
                 threads.append(p)
 
             # Terminate threads
             for thread in threads:
+                print("joining thread")
                 thread.join()
 
             # Update maximum radius

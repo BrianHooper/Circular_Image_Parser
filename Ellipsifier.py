@@ -39,9 +39,9 @@ def parse_image(filename):
 
     if parser.is_opened():
         # Set options for parser
-        parser.threshold = 50
-        parser.precision = 10
-        parser.minimum_size = 20
+        parser.threshold = 20
+        parser.precision = 2
+        parser.minimum_size = 2
 
         # Parse the image
         parser.evaluate_image()
@@ -59,7 +59,7 @@ def draw_image(filename, points, width, height):
 def main():
     filename = "images/" + "tinyhippo"
     parse_image(filename)
-    parse_from_file(filename)
+    # parse_from_file(filename)
 
 
 if __name__ == "__main__":
