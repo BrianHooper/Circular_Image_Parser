@@ -39,9 +39,9 @@ def parse_image(filename):
 
     if parser.is_opened():
         # Set options for parser
-        parser.threshold = 20
-        parser.precision = 2
-        parser.minimum_size = 2
+        parser.threshold = 60
+        parser.precision = 20
+        parser.minimum_size = 20
 
         # Parse the image
         parser.evaluate_image()

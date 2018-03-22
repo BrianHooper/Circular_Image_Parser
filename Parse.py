@@ -11,7 +11,6 @@ __email__ = "brian_hooper@msn.com"
 
 import queue
 import math
-import time
 import timeit
 import multiprocessing
 from PIL import Image, ImageDraw
@@ -94,7 +93,6 @@ class Parse:
                         lock.release()
             except queue.Empty:
                 continue
-        time.sleep(5)
 
     def __parse_image(self):
         # For multiprocessing
@@ -121,14 +119,13 @@ class Parse:
             threads = []
             # Start threads
             for t in range(0, self.num_threads):
-                print("starting thread")
-                p = multi_context.Process(target=self.__thread_process, args=(t, q, max_rad, max_x, max_y, lock, found_by))
+                p = multi_context.Process(target=self.__thread_process,
+                                          args=(t, q, max_rad, max_x, max_y, lock, found_by))
                 p.start()
                 threads.append(p)
 
             # Terminate threads
             for thread in threads:
-                print("joining thread")
                 thread.join()
 
             # Update maximum radius
