@@ -11,6 +11,7 @@ __email__ = "brian_hooper@msn.com"
 
 import Parse
 import Draw
+import os
 from ast import literal_eval as make_tuple
 
 
@@ -39,9 +40,13 @@ def parse_image(filename):
 
     if parser.is_opened():
         # Set options for parser
-        parser.threshold = 60
-        parser.precision = 20
-        parser.minimum_size = 20
+        parser.threshold = 15
+        parser.precision = 3
+
+        parser.minimum_size = 2
+        parser.maximum_size = 249
+
+        parser.num_threads = 2
 
         # Parse the image
         parser.evaluate_image()
@@ -57,9 +62,16 @@ def draw_image(filename, points, width, height):
 
 
 def main():
-    filename = "images/" + "tinyhippo"
+    filename = "images/" + "burning"
+
+    # Set this to true if the program should attempt to load a partially completed file
+    load_partial = True
+    if not load_partial:
+        if os.path.exists(filename + ".txt"):
+            os.remove(filename + ".txt")
+
     parse_image(filename)
-    # parse_from_file(filename)
+    parse_from_file(filename)
 
 
 if __name__ == "__main__":

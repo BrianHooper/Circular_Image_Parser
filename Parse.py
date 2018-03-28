@@ -9,10 +9,11 @@ __license__ = "MIT"
 __version__ = "0.2"
 __email__ = "brian_hooper@msn.com"
 
-import queue
+import os.path
 import math
 import timeit
 import multiprocessing
+from ast import literal_eval as make_tuple
 from PIL import Image, ImageDraw
 
 
@@ -43,6 +44,9 @@ class Parse:
             self.image_pixels = self.image.load()
             self.width, self.height = self.image.size
             self.__opened = True
+
+            if os.path.exists(filename + ".txt"):
+                self.__load_partial()
         except IOError:
             print("Error opening " + filename + ".jpg")
 
@@ -55,13 +59,13 @@ class Parse:
             print("Error, no file opened.")
             return
 
-        # Truncate the log file
-        try:
-            file = open(self.input_filename + ".txt", "w+")
-            file.write("")
-            file.close()
-        except IOError:
-            pass
+        # # Truncate the log file
+        # try:
+        #     file = open(self.input_filename + ".txt", "w+")
+        #     file.write("")
+        #     file.close()
+        # except IOError:
+        #     pass
 
         # Parse the image
         start = timeit.default_timer()  # Timer
@@ -71,28 +75,38 @@ class Parse:
         # Calculate some information about the process
         print("Calculated in " + str(int(stop - start)) + " second(s).")
 
-    def __thread_process(self, process_id, q, max_rad, max_x, max_y, lock, found_by):
-        # Continue reading x values from the queue until it is empty
-        while q.qsize() > 0:
-            try:
-                x_val = q.get(timeout=2)
-                # Check each y value
-                for y_val in range(self.precision, self.height - self.precision, self.precision):
-                    # Find the largest radius at the current x, y location
-                    current_radius = self.__find_biggest_radius(x_val, y_val, max_rad.value)
+    def __load_partial(self):
+        try:
+            text_file = open(self.input_filename + ".txt", "r")
+            lines = text_file.readlines()
+            text_file.close()
+        except IOError:
+            return
 
-                    # Update the max radius if the current radius is larger than the previous max
-                    lock.acquire()
-                    try:
-                        if current_radius > max_rad.value:
-                            max_rad.value = current_radius
-                            max_x.value = x_val
-                            max_y.value = y_val
-                            found_by.value = process_id
-                    finally:
-                        lock.release()
-            except queue.Empty:
-                continue
+        for line in lines:
+            point = make_tuple(line)
+            self.__draw_special(point[0], point[1], point[2])
+            self.image.save(self.input_filename + "_temp.jpg")
+
+    def __thread_process(self, process_id, q, max_rad, max_x, max_y, lock, found_by, prev_max):
+        # Continue reading x values from the queue until it is empty
+        while q.qsize() > 0 and (prev_max.value == 0 or prev_max.value >= max_rad.value):
+            x_val = q.get(timeout=2)
+            # Check each y value
+            for y_val in range(self.precision, self.height - self.precision, self.precision):
+                # Find the largest radius at the current x, y location
+                current_radius = self.__find_biggest_radius(x_val, y_val, max_rad.value)
+
+                # Update the max radius if the current radius is larger than the previous max
+                lock.acquire()
+                try:
+                    if current_radius > max_rad.value:
+                        max_rad.value = current_radius
+                        max_x.value = x_val
+                        max_y.value = y_val
+                        found_by.value = process_id
+                finally:
+                    lock.release()
 
     def __parse_image(self):
         # For multiprocessing
@@ -105,6 +119,7 @@ class Parse:
         max_x = multi_context.Value('i', 0)
         max_y = multi_context.Value('i', 0)
         found_by = multi_context.Value('i', 0)
+        prev_max = multi_context.Value('i', 0)
 
         while max_rad.value > self.minimum_size:
             # Clear previous value for maximum radius
@@ -120,7 +135,7 @@ class Parse:
             # Start threads
             for t in range(0, self.num_threads):
                 p = multi_context.Process(target=self.__thread_process,
-                                          args=(t, q, max_rad, max_x, max_y, lock, found_by))
+                                          args=(t, q, max_rad, max_x, max_y, lock, found_by, prev_max))
                 p.start()
                 threads.append(p)
 
@@ -220,9 +235,14 @@ class Parse:
             return False
         if radius > self.maximum_size:
             return False
+
+        # Check that the center of the image is not within a previously drawn circle
+        center = self.__get_pixel(x, y)
+        if self.__is_special_color(center):
+            return False
+
         absolute_points = self.__get_points(x, y, radius)
 
-        center = self.__get_pixel(x, y)
         for point in absolute_points:
             if not self.__on_image(point[0], point[1]):
                 return False
