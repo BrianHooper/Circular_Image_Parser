@@ -14,6 +14,24 @@ import Draw
 import os
 from ast import literal_eval as make_tuple
 
+def parse_svg_from_file(filename, scale):
+    try:
+        file = open(filename + ".txt", "r")
+        lines = file.readlines()
+        file.close()
+
+        points = []
+        for line in lines:
+            points.append(make_tuple(line))
+
+        parser = Parse.Parse(filename)
+        color_points = parser.get_all_colors(points)
+
+        draw_svg(filename, color_points, parser.width, parser.height, scale)
+    except IOError:
+        print("Error opening text file " + filename + ".txt")
+        return
+
 
 def parse_from_file(filename):
     try:
@@ -34,19 +52,19 @@ def parse_from_file(filename):
         return
 
 
-def parse_image(filename):
+def parse_image(filename, threshold, precision, min, max, threads):
     # Open the file
     parser = Parse.Parse(filename)
 
     if parser.is_opened():
         # Set options for parser
-        parser.threshold = 15
-        parser.precision = 3
+        parser.threshold = threshold
+        parser.precision = precision
 
-        parser.minimum_size = 2
-        parser.maximum_size = 249
+        parser.minimum_size = min
+        parser.maximum_size = max
 
-        parser.num_threads = 2
+        parser.num_threads = threads
 
         # Parse the image
         parser.evaluate_image()
@@ -61,8 +79,17 @@ def draw_image(filename, points, width, height):
         drawer.draw_image(points, filename + "_output.png", width, height)
 
 
-def main():
-    filename = "images/" + "burning"
+def draw_svg(filename, points, width, height, scale):
+    if filename is None or points is None:
+        return
+
+    if len(points) > 0:
+        drawer = Draw
+        drawer.draw_svg(points, filename + "_output.svg", width, height, scale)
+
+
+def create_image(file_name):
+    filename = "images/" + file_name
 
     # Set this to true if the program should attempt to load a partially completed file
     load_partial = True
@@ -70,8 +97,22 @@ def main():
         if os.path.exists(filename + ".txt"):
             os.remove(filename + ".txt")
 
-    parse_image(filename)
+    print("First pass")
+    parse_image(filename, 6, 3, 20, 250, 4)
     parse_from_file(filename)
+    print("Second pass")
+    parse_image(filename, 15, 3, 10, 250, 4)
+    print("Third pass")
+    parse_image(filename, 25, 3, 5, 250, 4)
+    print("Fourth pass")
+    parse_image(filename, 80, 3, 2, 250, 4)
+    parse_from_file(filename)
+
+
+def main():
+    for num in range(1, 16):
+        create_image(str(num))
+
 
 
 if __name__ == "__main__":

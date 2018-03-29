@@ -10,6 +10,7 @@ __version__ = "0.2"
 __email__ = "brian_hooper@msn.com"
 
 import gizeh
+import svgwrite
 
 # Drawing settings
 output_background_color = (0, 0, 0)  # Background color of the final image
@@ -20,7 +21,46 @@ border_color = (0, 0, 0)  # Color of the border
 border_radius_threshold = 4  # Don't draw the border if the radius is less than this
 
 
+def draw_svg(points, filename, width, height, scale):
+    dwg = svgwrite.Drawing(filename=filename, size=(int(width * scale), int(height * scale)))
+    bg_color = "rgb(" + str(output_background_color[0]) + "," + str(output_background_color[1]) + "," + str(output_background_color[2]) + ")"
+    bd_color = "rgb(" + str(border_color[0]) + "," + str(border_color[1]) + "," + str(border_color[2]) + ")"
+
+    background = dwg.rect(insert=(0, 0), size=(int(width * scale), int(height * scale))).fill(bg_color)
+    dwg.add(background)
+
+    for point in points:
+        x = int(point[0][0] * scale)
+        y = int(point[0][1] * scale)
+
+        # Draw the outer color
+        radius = int(point[0][2] * scale)
+        outer_color = "rgb(" + str(point[1][0]) + "," + str(point[1][1]) + "," + str(point[1][2]) + ")"
+
+
+        # Don't draw the border if the radius is smaller than the threshold
+        if radius < border_radius_threshold:
+            border = 0
+        else:
+            border = border_width
+
+        # Draw the outer color and border
+        circle = dwg.circle(center=(x, y), r=radius)
+        circle.fill(outer_color).stroke(bd_color, width=border_width)
+        dwg.add(circle)
+
+        # # Draw the inner color
+        # inner_color = (point[1][0] / 255,
+        #                point[1][1] / 255,
+        #                point[1][2] / 255)
+        # radius = int(2 * (radius / 3))
+        # circle = gizeh.circle(r=radius, xy=[x, y], fill=inner_color)
+        # circle.draw(surface)
+    dwg.save()
+    return
+
 def draw_image(points, filename, width, height):
+    print("Attempting to draw image")
     if len(points) == 0 or len(filename) == 0 or width == 0 or height == 0:
         return
 
@@ -55,5 +95,6 @@ def draw_image(points, filename, width, height):
         circle = gizeh.circle(r=radius, xy=[x, y], fill=inner_color)
         circle.draw(surface)
 
+    print("Drawing complete")
     # Save the completed image
     surface.write_to_png(filename)

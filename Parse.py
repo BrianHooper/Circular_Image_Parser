@@ -12,6 +12,7 @@ __email__ = "brian_hooper@msn.com"
 import os.path
 import math
 import timeit
+import queue
 import multiprocessing
 from ast import literal_eval as make_tuple
 from PIL import Image, ImageDraw
@@ -19,6 +20,7 @@ from PIL import Image, ImageDraw
 
 class Parse:
     __opened = False
+    __fill_smallest = False
 
     # Input settings and image objects
     input_filename = ""  # File to parse
@@ -45,8 +47,6 @@ class Parse:
             self.width, self.height = self.image.size
             self.__opened = True
 
-            if os.path.exists(filename + ".txt"):
-                self.__load_partial()
         except IOError:
             print("Error opening " + filename + ".jpg")
 
@@ -59,6 +59,9 @@ class Parse:
             print("Error, no file opened.")
             return
 
+        if os.path.exists(self.input_filename + ".txt"):
+            self.__load_partial()
+
         # # Truncate the log file
         # try:
         #     file = open(self.input_filename + ".txt", "w+")
@@ -70,10 +73,14 @@ class Parse:
         # Parse the image
         start = timeit.default_timer()  # Timer
         self.__parse_image()
+        # print("*\n*\n*\nSwitching\n*\n*\n*")
+        # self.__fill_smallest = True
+        # self.__parse_image()
         stop = timeit.default_timer()  # Timer
 
         # Calculate some information about the process
         print("Calculated in " + str(int(stop - start)) + " second(s).")
+        self.image.close()
 
     def __load_partial(self):
         try:
@@ -83,15 +90,22 @@ class Parse:
         except IOError:
             return
 
+        print("Attempting to load partial")
         for line in lines:
             point = make_tuple(line)
             self.__draw_special(point[0], point[1], point[2])
-            self.image.save(self.input_filename + "_temp.jpg")
+
+        self.image.save(self.input_filename + "_temp.jpg")
+        print("Partial loaded")
 
     def __thread_process(self, process_id, q, max_rad, max_x, max_y, lock, found_by, prev_max):
         # Continue reading x values from the queue until it is empty
         while q.qsize() > 0 and (prev_max.value == 0 or prev_max.value >= max_rad.value):
-            x_val = q.get(timeout=2)
+            try:
+                x_val = q.get(timeout=2)
+            except queue.Empty:
+                return
+
             # Check each y value
             for y_val in range(self.precision, self.height - self.precision, self.precision):
                 # Find the largest radius at the current x, y location
@@ -140,8 +154,8 @@ class Parse:
                 threads.append(p)
 
             # Terminate threads
-            for thread in threads:
-                thread.join()
+            for t in range(0, len(threads)):
+                threads[t].join()
 
             # Update maximum radius
             max_radius_found = (max_x.value, max_y.value, max_rad.value)
@@ -251,7 +265,7 @@ class Parse:
                 return False
             if self.__is_special_color(pointcolor):
                 return False
-            if not self.__within(center, pointcolor):
+            if not self.__fill_smallest and not self.__within(center, pointcolor):
                 return False
         return True
 
@@ -290,8 +304,12 @@ class Parse:
 
     # Gets the colors for a list of pixels
     def get_all_colors(self, points):
-        # if points is None or len(points) == 0 or self.image_pixels is None:
-        #     return
+        try:
+            self.image = Image.open(self.input_filename + ".jpg")
+            self.image_pixels = self.image.load()
+        except IOError:
+            print("Error opening source file for loading colors")
+            return []
 
         point_color_list = []
         for point in points:
