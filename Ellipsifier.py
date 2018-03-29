@@ -14,6 +14,7 @@ import Draw
 import os
 from ast import literal_eval as make_tuple
 
+
 def parse_svg_from_file(filename, scale):
     try:
         file = open(filename + ".txt", "r")
@@ -52,7 +53,7 @@ def parse_from_file(filename):
         return
 
 
-def parse_image(filename, threshold, precision, min, max, threads):
+def parse_image(filename, threshold, precision, min_size, max_size, threads):
     # Open the file
     parser = Parse.Parse(filename)
 
@@ -61,8 +62,8 @@ def parse_image(filename, threshold, precision, min, max, threads):
         parser.threshold = threshold
         parser.precision = precision
 
-        parser.minimum_size = min
-        parser.maximum_size = max
+        parser.minimum_size = min_size
+        parser.maximum_size = max_size
 
         parser.num_threads = threads
 
@@ -110,9 +111,8 @@ def create_image(file_name):
 
 
 def main():
-    for num in range(1, 16):
+    for num in range(1, 19):
         create_image(str(num))
-
 
 
 if __name__ == "__main__":

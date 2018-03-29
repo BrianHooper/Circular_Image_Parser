@@ -23,7 +23,8 @@ border_radius_threshold = 4  # Don't draw the border if the radius is less than 
 
 def draw_svg(points, filename, width, height, scale):
     dwg = svgwrite.Drawing(filename=filename, size=(int(width * scale), int(height * scale)))
-    bg_color = "rgb(" + str(output_background_color[0]) + "," + str(output_background_color[1]) + "," + str(output_background_color[2]) + ")"
+    bg_color = "rgb(" + str(output_background_color[0]) + "," + \
+               str(output_background_color[1]) + "," + str(output_background_color[2]) + ")"
     bd_color = "rgb(" + str(border_color[0]) + "," + str(border_color[1]) + "," + str(border_color[2]) + ")"
 
     background = dwg.rect(insert=(0, 0), size=(int(width * scale), int(height * scale))).fill(bg_color)
@@ -37,27 +38,13 @@ def draw_svg(points, filename, width, height, scale):
         radius = int(point[0][2] * scale)
         outer_color = "rgb(" + str(point[1][0]) + "," + str(point[1][1]) + "," + str(point[1][2]) + ")"
 
-
-        # Don't draw the border if the radius is smaller than the threshold
-        if radius < border_radius_threshold:
-            border = 0
-        else:
-            border = border_width
-
         # Draw the outer color and border
         circle = dwg.circle(center=(x, y), r=radius)
         circle.fill(outer_color).stroke(bd_color, width=border_width)
         dwg.add(circle)
-
-        # # Draw the inner color
-        # inner_color = (point[1][0] / 255,
-        #                point[1][1] / 255,
-        #                point[1][2] / 255)
-        # radius = int(2 * (radius / 3))
-        # circle = gizeh.circle(r=radius, xy=[x, y], fill=inner_color)
-        # circle.draw(surface)
     dwg.save()
     return
+
 
 def draw_image(points, filename, width, height):
     print("Attempting to draw image")

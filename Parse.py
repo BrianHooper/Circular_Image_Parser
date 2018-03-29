@@ -62,20 +62,9 @@ class Parse:
         if os.path.exists(self.input_filename + ".txt"):
             self.__load_partial()
 
-        # # Truncate the log file
-        # try:
-        #     file = open(self.input_filename + ".txt", "w+")
-        #     file.write("")
-        #     file.close()
-        # except IOError:
-        #     pass
-
         # Parse the image
         start = timeit.default_timer()  # Timer
         self.__parse_image()
-        # print("*\n*\n*\nSwitching\n*\n*\n*")
-        # self.__fill_smallest = True
-        # self.__parse_image()
         stop = timeit.default_timer()  # Timer
 
         # Calculate some information about the process
