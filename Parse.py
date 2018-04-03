@@ -24,6 +24,7 @@ class Parse:
 
     # Input settings and image objects
     input_filename = ""  # File to parse
+    input_file_type = ""
     image, image_pixels = 0, 0
     width, height = 0, 0
     special_color = (218, 235, 111)  # Special color used to mark regions as complete
@@ -38,17 +39,19 @@ class Parse:
     threshold_increase_amount = 0  # Increase color threshold by this amount
 
     num_threads = 2
+    pass_number = 0
 
-    def __init__(self, filename):
+    def __init__(self, filename, extension):
         self.input_filename = filename
+        self.input_file_type = extension
         try:
-            self.image = Image.open(filename + ".jpg")
+            self.image = Image.open(filename + "." + extension)
             self.image_pixels = self.image.load()
             self.width, self.height = self.image.size
             self.__opened = True
 
         except IOError:
-            print("Error opening " + filename + ".jpg")
+            print("Error opening " + filename + "." + extension)
 
     def is_opened(self):
         return self.__opened
@@ -79,13 +82,13 @@ class Parse:
         except IOError:
             return
 
-        print("Attempting to load partial")
+        print("Attempting to load partial for " + self.input_filename)
         for line in lines:
             point = make_tuple(line)
             self.__draw_special(point[0], point[1], point[2])
 
         self.image.save(self.input_filename + "_temp.jpg")
-        print("Partial loaded")
+        print("Partial loaded for " + self.input_filename)
 
     def __thread_process(self, process_id, q, max_rad, max_x, max_y, lock, found_by, prev_max):
         # Continue reading x values from the queue until it is empty
@@ -130,6 +133,9 @@ class Parse:
             max_x.value = 0
             max_y.value = 0
 
+            # Computation time
+            start = timeit.default_timer()
+
             # Find the largest circle within the color threshold on the image
             for xcoordinate in range(self.precision, self.width - self.precision, self.precision):
                 q.put(xcoordinate)
@@ -149,8 +155,13 @@ class Parse:
             # Update maximum radius
             max_radius_found = (max_x.value, max_y.value, max_rad.value)
 
+            # Computation time
+            stop = timeit.default_timer()
+            computation_time = round(stop - start, 2)
+
             # Save the found point
-            print("Found radius " + str(max_radius_found) + " by process " + str(found_by.value))
+            print(self.input_filename + " #" + str(self.pass_number) + " "
+                  + str(max_radius_found) + " " + str(computation_time) + "s")
             self.__write_log(max_radius_found)
 
             # Lock pixels by drawing the circle on the canvas using the special color
@@ -294,7 +305,7 @@ class Parse:
     # Gets the colors for a list of pixels
     def get_all_colors(self, points):
         try:
-            self.image = Image.open(self.input_filename + ".jpg")
+            self.image = Image.open(self.input_filename + "." + self.input_file_type)
             self.image_pixels = self.image.load()
         except IOError:
             print("Error opening source file for loading colors")
