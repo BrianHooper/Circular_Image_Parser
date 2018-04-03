@@ -6,7 +6,7 @@
 __author__ = "Brian Hooper"
 __copyright__ = "Copyright (c) 2018 Brian Hooper"
 __license__ = "MIT"
-__version__ = "0.2"
+__version__ = "1.0"
 __email__ = "brian_hooper@msn.com"
 
 import os.path
@@ -82,13 +82,11 @@ class Parse:
         except IOError:
             return
 
-        print("Attempting to load partial for " + self.input_filename)
         for line in lines:
             point = make_tuple(line)
             self.__draw_special(point[0], point[1], point[2])
 
         self.image.save(self.input_filename + "_temp.jpg")
-        print("Partial loaded for " + self.input_filename)
 
     def __thread_process(self, process_id, q, max_rad, max_x, max_y, lock, found_by, prev_max):
         # Continue reading x values from the queue until it is empty

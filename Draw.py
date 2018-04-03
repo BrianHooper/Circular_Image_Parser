@@ -6,11 +6,12 @@
 __author__ = "Brian Hooper"
 __copyright__ = "Copyright (c) 2018 Brian Hooper"
 __license__ = "MIT"
-__version__ = "0.2"
+__version__ = "1.0"
 __email__ = "brian_hooper@msn.com"
 
 import gizeh
 import svgwrite
+
 
 # Drawing settings
 output_background_color = (0, 0, 0)  # Background color of the final image
@@ -46,8 +47,7 @@ def draw_svg(points, filename, width, height, scale):
     return
 
 
-def draw_image(points, filename, width, height):
-    print("Attempting to draw image")
+def draw_png(points, filename, width, height):
     if len(points) == 0 or len(filename) == 0 or width == 0 or height == 0:
         return
 
@@ -57,11 +57,12 @@ def draw_image(points, filename, width, height):
         x = point[0][0]
         y = point[0][1]
 
-        # Draw the outer color
+        # Draw the outer color0.
         radius = point[0][2]
-        outer_color = (((point[1][0] + (255 - point[1][0]) / 2) / 255),
-                       ((point[1][1] + (255 - point[1][1]) / 2) / 255),
-                       ((point[1][2] + (255 - point[1][2]) / 2) / 255))
+        threshold = 1 / outer_color_threshold
+        outer_color = (((point[1][0] + (255 - point[1][0]) / threshold) / 255),
+                       ((point[1][1] + (255 - point[1][1]) / threshold) / 255),
+                       ((point[1][2] + (255 - point[1][2]) / threshold) / 255))
 
         # Don't draw the border if the radius is smaller than the threshold
         if radius < border_radius_threshold:
@@ -78,10 +79,9 @@ def draw_image(points, filename, width, height):
         inner_color = (point[1][0] / 255,
                        point[1][1] / 255,
                        point[1][2] / 255)
-        radius = int(2 * (radius / 3))
+        radius = int(inner_color_width * radius)
         circle = gizeh.circle(r=radius, xy=[x, y], fill=inner_color)
         circle.draw(surface)
 
-    print("Drawing complete")
     # Save the completed image
     surface.write_to_png(filename)

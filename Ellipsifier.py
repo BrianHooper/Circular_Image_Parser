@@ -6,7 +6,7 @@
 __author__ = "Brian Hooper"
 __copyright__ = "Copyright (c) 2018 Brian Hooper"
 __license__ = "MIT"
-__version__ = "0.2"
+__version__ = "1.0"
 __email__ = "brian_hooper@msn.com"
 
 import Parse
@@ -16,7 +16,7 @@ import configparser
 from ast import literal_eval as make_tuple
 
 
-def parse_svg_from_file(filename, scale):
+def parse_from_file(filename, extension, format, scale):
     try:
         file = open(filename + ".txt", "r")
         lines = file.readlines()
@@ -26,32 +26,13 @@ def parse_svg_from_file(filename, scale):
         for line in lines:
             points.append(make_tuple(line))
 
-        parser = Parse.Parse(filename)
+        parser = Parse.Parse(filename, extension)
         color_points = parser.get_all_colors(points)
 
-        draw_svg(filename, color_points, parser.width, parser.height, scale)
+        return parser.width, parser.height, color_points
     except IOError:
         print("Error opening text file " + filename + ".txt")
-        return
-
-
-def parse_from_file(filename):
-    try:
-        file = open(filename + ".txt", "r")
-        lines = file.readlines()
-        file.close()
-
-        points = []
-        for line in lines:
-            points.append(make_tuple(line))
-
-        parser = Parse.Parse(filename)
-        color_points = parser.get_all_colors(points)
-
-        draw_image(filename, color_points, parser.width, parser.height)
-    except IOError:
-        print("Error opening text file " + filename + ".txt")
-        return
+        return 0, 0, []
 
 
 def parse_image(filename, extension, pass_number, threshold, precision, min_size, max_size, threads):
@@ -82,29 +63,7 @@ def draw_image(filename, points, width, height):
         drawer.draw_image(points, filename + "_output.png", width, height)
 
 
-def draw_svg(filename, points, width, height, scale):
-    if filename is None or points is None:
-        return
 
-    if len(points) > 0:
-        drawer = Draw
-        drawer.draw_svg(points, filename + "_output.svg", width, height, scale)
-
-
-def create_image(file_name):
-    filename = "images/" + file_name
-
-    # Set this to true if the program should attempt to load a partially completed file
-    load_partial = True
-    if not load_partial:
-        if os.path.exists(filename + ".txt"):
-            os.remove(filename + ".txt")
-
-    parse_image(filename, "jpg", 1, 6, 3, 20, 250, 4)
-    parse_image(filename, "jpg", 2, 15, 3, 10, 250, 4)
-    parse_image(filename, "jpg", 3, 25, 3, 5, 250, 4)
-    parse_image(filename, "jpg", 4, 80, 3, 2, 250, 4)
-    parse_from_file(filename)
 
 
 def to_int_list(input_string):
@@ -125,6 +84,8 @@ def main():
         print("Cannot find config file")
         return
 
+    drawer = Draw
+
     try:
         files = config['FILES']
         thresholds = to_int_list(config['IMAGE SETTINGS']['Thresholds'])
@@ -137,6 +98,12 @@ def main():
         threads = int(config['SETTINGS']['Threads'])
         format = config['OUTPUT']['Format']
         scale = float(config['OUTPUT']['Scale'])
+        drawer.output_background_color = make_tuple(config['DRAWING']['Background_Color'])
+        drawer.outer_color_threshold = float(config['DRAWING']['Outer_Color'])
+        drawer.inner_color_width = float(config['DRAWING']['Inner_Width'])
+        drawer.border_width = int(config['DRAWING']['Border_Width'])
+        drawer.border_color = make_tuple(config['DRAWING']['Border_Color'])
+        drawer.border_radius_threshold = int(config['DRAWING']['Border_Threshold'])
     except KeyError:
         print("Error parsing config file")
         return
@@ -161,11 +128,20 @@ def main():
                     os.remove(filename + ".txt")
 
             if parse:
+                print("Parsing " + filename)
                 for i in range(0, num_passes):
                     parse_image(filename, extension, i + 1, thresholds[i], precision[i], min_sizes[i], max_sizes[i], threads)
             if draw:
-                print("Draw")
-
+                print("Drawing " + filename)
+                width, height, points = parse_from_file(filename, extension, format, scale)
+                if len(points) > 0:
+                    if format == "png":
+                        drawer.draw_png(points, filename + "_output.png", width, height)
+                    elif format == "svg":
+                        pass
+            print("Ellipsifying " + filename + " finished.")
+        else:
+            print("Error: " + file + " not found")
 
 if __name__ == "__main__":
     main()
