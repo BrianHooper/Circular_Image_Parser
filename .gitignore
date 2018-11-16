@@ -101,6 +101,6 @@ ENV/
 .mypy_cache/
 
 # Parse files
-.png
-.jpg
-.txt
+images/
+__pycache__
+.idea/
