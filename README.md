@@ -3,7 +3,7 @@
 
 Image Ellipsifier is a small Python program that scans an image and searches for the largest circular regions that contain all pixels of roughly the same color as each other. The application uses the Python Pillow Imaging Library for image processing and is supports parallelization using the Python Multiprocessing Library. 
 
-To see a simplified example of the inner workings of the program, check out the Jupyter notebook for the project [here](/jupyter/ellipsify-simple.ipynb).
+To see a simplified example of the inner workings of the program, check out the Jupyter notebook for the project [here](https://github.com/BrianHooper/Image-Ellipsify-Notebook/blob/master/ellipsify-simple.ipynb).
 
 ### Examples
 
